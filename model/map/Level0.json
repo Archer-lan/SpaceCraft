@@ -1,0 +1,18 @@
+[
+    {
+        "id":0,
+        "xWidth":638,
+        "yWidth":638,
+        "xOffset":-319,
+        "yOffset":0,
+        "imagePath":"../model/texture/Level0/tx_0_0.jpg"
+    },
+    {
+        "id":1,
+        "xWidth":638,
+        "yWidth":638,
+        "xOffset":319,
+        "yOffset":0,
+        "imagePath":"../model/texture/Level0/tx_1_0.jpg"
+    }
+]
