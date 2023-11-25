@@ -5,8 +5,6 @@ import sceneSphere from "./sphere.js"
 import {distanceToCenter} from "./utils/pointWithSphere.js"
 import Transform from "./utils/transform.js"
 
-
-
 let camera,scene,renderer,controls;
 const radius = 150;//地球半径
 const Trans=new Transform(radius);

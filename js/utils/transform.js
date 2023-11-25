@@ -5,7 +5,11 @@ export default class Transform{
         this.radius=radius;
     }
 
-
+    /**
+     * 经纬度转为4836坐标系，即地图按照经纬度展开
+     * @param {Object} latlng 经纬度 
+     * @returns 
+     */
     latlngToMercator(latlng){
         // const originShift = Math.PI *this.radius;
         const xWidth = 2*Math.PI*100;
@@ -20,6 +24,11 @@ export default class Transform{
         return {x,y};
     }
 
+    /**
+     * 4836坐标系转为经纬度
+     * @param {Object} point 坐标点包含xy 
+     * @returns 
+     */
     MercatorToLatLng(point){
         let x=point.x;
         let y=point.y;
@@ -43,7 +52,7 @@ export default class Transform{
 
     /**
      * 空间坐标系转经纬度坐标
-     * @param {Object} point //相机所在点
+     * @param {Object} point //相机所在点包含xyz
      * @returns 
      */
     spatialCoordToLatLng(point){

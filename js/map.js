@@ -1,9 +1,10 @@
 import * as THREE from "three"
+import Curve from "./utils/curve.js";
 
 let scenePlane = new THREE.Scene();
 
 let planes;
-// let planeNormal;
+const curve = new Curve(50);
 
 await fetch("./model/map/Level4.json")
 .then((response)=>{
@@ -23,5 +24,10 @@ for(let plane of planes){
     scenePlane.add(curPlane);
 }
 
+curve.addPoint({x:0,y:100,z:100});
+curve.addPoint({x:0,y:0,z:0});
+
+let line = curve.generateCurve();
+scenePlane.add(line);
 
 export default scenePlane;

@@ -2,9 +2,11 @@ import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 import {OBJLoader} from "three/addons/loaders/OBJLoader.js"
-
+import Curve from "./utils/curve.js";
 
 let sceneSphere = new THREE.Scene();
+let curve = new Curve(100);
+
 const ambienLight = new THREE.AmbientLight(0xffffff,0.8);
 const pointLight = new THREE.PointLight(0xffffff,1,0,0);
 pointLight.position.set(400,0,0);
@@ -32,5 +34,13 @@ GLTFloader.load("scene.gltf",async function(gltf){
 //     sceneSphere.add(model);
 // })
 
+curve.addPoint({x:0,y:100,z:150});
+curve.addPoint({x:0,y:0,z:90});
 
+let line = curve.generateCurve();
+
+let circle = curve.generateCircle({x:0,y:0},100)
+
+sceneSphere.add(line);
+sceneSphere.add(circle);
 export default sceneSphere;
