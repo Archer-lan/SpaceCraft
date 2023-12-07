@@ -13,7 +13,6 @@ const radius = 150;//地球模型半径
 const trans = new Transform(radius);
 const line = new Line();
 const craft = new Craft()
-craft.loadModel();
 
 init();
 async function init(){
@@ -42,7 +41,8 @@ async function init(){
     scene.add(sphereCircle.circle);
     // await craft.loadModel(scene);
     // scene.add(craft.model);
-
+    craft.loadModel(scene);
+    
 
     renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setPixelRatio(window.devicePixelRatio);
