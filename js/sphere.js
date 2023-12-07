@@ -34,13 +34,13 @@ GLTFloader.load("scene.gltf",async function(gltf){
 //     sceneSphere.add(model);
 // })
 
-curve.addPoint({x:0,y:100,z:150});
-curve.addPoint({x:0,y:0,z:90});
+// curve.addPoint({x:0,y:100,z:150});
+// curve.addPoint({x:0,y:0,z:90});
 
-let line = curve.generateCurve();
+// let {line,lpoints} = curve.generateCurve();
 
-let circle = curve.generateCircle({x:0,y:0},100)
+// let {circle,cpoints} = curve.generateCircle({x:0,y:0},100)
 
-sceneSphere.add(line);
-sceneSphere.add(circle);
+// sceneSphere.add(line);
+// sceneSphere.add(circle);
 export default sceneSphere;

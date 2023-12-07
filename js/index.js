@@ -19,7 +19,6 @@ async function init(){
     camera.position.set(0,0,200);
 
     scene = sceneSphere;
-
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth,window.innerHeight);
@@ -28,20 +27,25 @@ async function init(){
     container.appendChild(renderer.domElement);
 
     controls=new OrbitControls(camera,renderer.domElement);
-    controls.addEventListener('change',render);
+    controls.autoRotate=true;
+    controls.autoRotateSpeed=0.05;
+    // controls.addEventListener('change',render);
     controls.minDistance=50;
     controls.maxDistance=500;
     controls.target.set(0,0,0);
-    controls.update;
-    // const axesHelper = new THREE.AxesHelper(170);
-    // scene.add(axesHelper);
+    controls.update();
+    const axesHelper = new THREE.AxesHelper(170);
+    scene.add(axesHelper);
     window.addEventListener("resize",onWindowResize);
+    requestAnimationFrame(render);
 }
 
 function render(){
     let distance;
     if(scene===sceneSphere){
         //球体中心不会动，取相机到原点的距离为判定条件
+        // scene.rotation.y+=0.0001
+        // console.log(camera.position);
         distance=distanceToCenter([camera.position.x,camera.position.y,camera.position.z]);
         if(distance<125){
             let latlng=Trans.spatialCoordToLatLng({
@@ -76,7 +80,9 @@ function render(){
             scene = sceneSphere;
         }
     }
+    controls.update();//让地球动起来
     renderer.render(scene,camera);
+    requestAnimationFrame(render);
 }
 
 
@@ -87,7 +93,7 @@ function onWindowResize() {
 
     renderer.setSize( window.innerWidth, window.innerHeight );
 
-    render();
+    // render();
 
 }
 

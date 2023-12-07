@@ -38,7 +38,10 @@ export default class Curve{
                 color:0xffffff
             })
         )
-        return line;
+        return {
+            line,
+            points
+        }
     }
 
     /**
@@ -56,6 +59,9 @@ export default class Curve{
                 color:0xffffff
             })
         )
-        return circle
+        return {
+            circle,
+            points
+        }
     }
 }
