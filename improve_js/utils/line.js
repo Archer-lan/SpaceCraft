@@ -2,7 +2,7 @@ import * as THREE from "three"
 export default class Line{
     constructor(lineList,number,circleCenter,radius,curveType,closed){
         this.lineList=lineList || [];
-        this.number=number || 100;
+        this.number=number || 10000;
         this.curveType = curveType || "chordal";
         this.closed = closed || false;
         this.radius = radius || 100;
@@ -45,7 +45,7 @@ export default class Line{
      * 生成圆环
      */
     generateCircle(color){
-        const arcCurve = new THREE.ArcCurve(this.circleCenter.x, this.circleCenter.y, this.radius,0,2*Math.PI);
+        const arcCurve = new THREE.ArcCurve(this.circleCenter.x, this.circleCenter.y, 150,0,2*Math.PI);
         const points = arcCurve.getPoints(this.number);
         
         const circle = new THREE.Line(

@@ -18,7 +18,7 @@ export default{
         geometries = geometries.map((value)=>{
             // let geometry = value.geometry
             let geometry = this.fromLoadBufferGeometry(value.geometry)
-            console.log(geometry)
+            // console.log(geometry)
             let scaleFactor = 4 / maxRadius;
             // 用比例尺因子缩放所有的顶点
             for (let i = 0, il = geometry.vertices.length; i < il; ++i) {

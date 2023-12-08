@@ -13,6 +13,21 @@ const radius = 150;//地球模型半径
 const trans = new Transform(radius);
 const line = new Line();
 const craft = new Craft()
+var move
+var rotate
+//生成曲线
+line.addPoint({
+    x:0,
+    y:100,
+    z:0,
+})
+line.addPoint({
+    x:0,
+    y:150,
+    z:0,
+})
+const sphereLine = line.generateLine();
+const sphereCircle = line.generateCircle();
 
 init();
 async function init(){
@@ -20,28 +35,18 @@ async function init(){
     document.body.appendChild(container);
 
     camera = new THREE.PerspectiveCamera(45,window.innerWidth / window.innerHeight,0.25,1000);
-    camera.position.set(0,0,200);
+    camera.position.set(0,200,100);
 
     scene = Sphere;
 
-    //生成曲线
-    line.addPoint({
-        x:0,
-        y:100,
-        z:0,
-    })
-    line.addPoint({
-        x:0,
-        y:150,
-        z:0,
-    })
-    const sphereLine = line.generateLine();
-    const sphereCircle = line.generateCircle();
+    
+    
     scene.add(sphereLine.curve);
     scene.add(sphereCircle.circle);
     // await craft.loadModel(scene);
     // scene.add(craft.model);
     craft.loadModel(scene);
+
     
 
     renderer = new THREE.WebGLRenderer({antialias:true});
@@ -56,11 +61,14 @@ async function init(){
     controls.autoRotate=true;
     controls.autoRotateSpeed=0.05;
     
-    controls.minDistance=30;
+    controls.minDistance=5;
     controls.maxDistance=500;
     controls.target.set(0,0,0);
     controls.update();
-
+    move = craft.setPosition(scene,sphereCircle.points,camera,controls)
+    rotate = craft.rotate(scene)
+    // render()
+    // controls.addEventListener("change",render)
     window.addEventListener("resize",onWindowResize);
     requestAnimationFrame(render);
 }
@@ -68,6 +76,8 @@ async function init(){
 function render(){
     changeScene();
     controls.update();
+    move()
+    rotate()
     renderer.render(scene,camera);
     requestAnimationFrame(render);
 }
