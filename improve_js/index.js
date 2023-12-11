@@ -15,6 +15,7 @@ const line = new Line();
 const craft = new Craft()
 var move
 var rotate
+var down = false
 //生成曲线
 line.addPoint({
     x:0,
@@ -58,8 +59,8 @@ async function init(){
 
     controls = new OrbitControls(camera,renderer.domElement);
     //相机自旋转
-    controls.autoRotate=true;
-    controls.autoRotateSpeed=0.05;
+    controls.autoRotate=false;
+    // controls.autoRotateSpeed=0.05;
     
     controls.minDistance=5;
     controls.maxDistance=500;
@@ -68,7 +69,15 @@ async function init(){
     move = craft.setPosition(scene,sphereCircle.points,camera,controls)
     rotate = craft.rotate(scene)
     // render()
-    // controls.addEventListener("change",render)
+    // let canvas = document.querySelector('canvas')
+    // console.log(canvas)
+    // console.log(controls.domElement)
+   
+    controls.addEventListener("change",(event)=>{
+        // console.log("change")
+        // console.log(camera.position)
+        // console.log(event.target.object.position)
+    })
     window.addEventListener("resize",onWindowResize);
     requestAnimationFrame(render);
 }
