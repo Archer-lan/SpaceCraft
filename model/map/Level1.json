@@ -1,0 +1,66 @@
+[
+  {
+    "id": 0,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": -478.5,
+    "yOffset": 159.5,
+    "imagePath": "../model/texture/Level1/tx_0_0.jpg"
+  },
+  {
+    "id": 1,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": -478.5,
+    "yOffset": -159.5,
+    "imagePath": "../model/texture/Level1/tx_0_1.jpg"
+  },
+  {
+    "id": 2,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": -159.5,
+    "yOffset": 159.5,
+    "imagePath": "../model/texture/Level1/tx_1_0.jpg"
+  },
+  {
+    "id": 3,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": -159.5,
+    "yOffset": -159.5,
+    "imagePath": "../model/texture/Level1/tx_1_1.jpg"
+  },
+  {
+    "id": 4,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": 159.5,
+    "yOffset": 159.5,
+    "imagePath": "../model/texture/Level1/tx_2_0.jpg"
+  },
+  {
+    "id": 5,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": 159.5,
+    "yOffset": -159.5,
+    "imagePath": "../model/texture/Level1/tx_2_1.jpg"
+  },
+  {
+    "id": 6,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": 478.5,
+    "yOffset": 159.5,
+    "imagePath": "../model/texture/Level1/tx_3_0.jpg"
+  },
+  {
+    "id": 7,
+    "xWidth": 319,
+    "yWidth": 319,
+    "xOffset": 478.5,
+    "yOffset": -159.5,
+    "imagePath": "../model/texture/Level1/tx_3_1.jpg"
+  }
+]
