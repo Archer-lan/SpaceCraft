@@ -32,7 +32,6 @@ async function init(){
     //不能实现加载一次模型文件进行复用，three会给每个mesh一个group，当改变原始obj时会影响到另一个scene
     models.Sphere=await createObject(Sphere);
     models.Map=await createObject(Map);
-    console.log(models);
 
     three.scene = Sphere;
 
