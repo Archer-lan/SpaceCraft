@@ -55,9 +55,9 @@ export default class Objects{
             three.camera.position.set(points[index].x,points[index].y,points[index].z);
             three.controls.target.set(points[index].x,points[index].y,points[index].z);
         }
-        if(index>=points.length){
-            index %=(points.length);
-        }
+        // if(index>=points.length){
+        //     index %=(points.length);
+        // }
         model.position.set(points[index].x,points[index].y,points[index].z);
         three.controls.target.set(points[index].x,points[index].y,points[index].z);
 
@@ -67,8 +67,8 @@ export default class Objects{
     
         three.camera.position.set(x,y,z);
         
-        index++;
-        return index;
+        // index++;
+        // return index;
     }
 
     /**
@@ -79,12 +79,12 @@ export default class Objects{
      * @returns 
      */
     static moveInFree(model,points,index){
-        if(index>=points.length){
-            index %=(points.length);
-        }
+        // if(index>=points.length){
+        //     index %=(points.length);
+        // }
         model.position.set(points[index].x,points[index].y,points[index].z);
-        index++;
-        return index;
+        // index++;
+        // return index;
     }
 
     /**

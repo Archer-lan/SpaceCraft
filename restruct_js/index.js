@@ -2,20 +2,19 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GUI } from "three/addons/libs/dat.gui.module.js";
 
-import { guiParams, modelNames, models, three } from './js/global.js';
+import { Geometry } from './js/fire/geometry.js';
+import { Material } from './js/fire/material.js';
+import { clock, guiParams, modelNames, models, three, transform } from './js/global.js';
 import { Map, Sphere } from './js/loadScene.js';
 import Obj from './js/objControl/object.js';
 import Objects from './js/objControl/objects.js';
 import { distanceToCenter } from './utils/distance.js';
 import Line from './utils/line.js';
-import Transform from './utils/transform.js';
 
-let transform=new Transform();
 init();
 async function init(){
     //初始化数据
     data = transformData(data);
-    console.log(data);
     modelNames.push(...Object.keys(data));
     guiParams.model=modelNames[0];
 
@@ -28,10 +27,12 @@ async function init(){
     //初始化gui界面
     guiSetting();
 
+    //加载飞行器模型，火焰，坠落线
     //TODO:存在问题，模型文件加载两次
     //不能实现加载一次模型文件进行复用，three会给每个mesh一个group，当改变原始obj时会影响到另一个scene
     models.Sphere=await createObject(Sphere);
     models.Map=await createObject(Map);
+    console.log(models);
 
     three.scene = Sphere;
 
@@ -55,18 +56,25 @@ function render(){
  */
 function renderControl(){
     // let str = three.scene===Map?"Map":"Sphere";
+    let delta = clock.getDelta();
     if(three.scene===Map){
         models.Map.objects.forEach((model)=>{
             if(guiParams.mode==='0'){
                 changeSceneInFree();
-                model.index=Objects.moveInFree(model.mesh,model.line.points,model.index);
+                Objects.moveInFree(model.mesh,model.line.points,model.index);
             }else{
                 if(model.mesh.name===guiParams.model){
-                    model.index=Objects.moveInLock(model.mesh,model.line.points,model.index);
+                    Objects.moveInLock(model.mesh,model.line.points,model.index);
                 }else{
-                    model.index=Objects.moveInFree(model.mesh,model.line.points,model.index);
+                    Objects.moveInFree(model.mesh,model.line.points,model.index);
                 } 
             }
+            //更新火焰位置
+            Objects.moveInFree(model.fire,model.line.points,model.index);
+            model.fire.material.update(delta*2)
+            //播放控制
+            model.index=playControl(model.index,model.line.points);
+
             Objects.rotate(model.mesh,0.1,0.1,0.1);
         })
     }else{
@@ -75,17 +83,39 @@ function renderControl(){
             if(model.mesh.name==='whole'){
                 if(guiParams.mode==='0'){
                     changeSceneInFree();
-                    model.index=Objects.moveInFree(model.mesh,model.line.points,model.index);
+                    Objects.moveInFree(model.mesh,model.line.points,model.index)
+                    // model.index=Objects.moveInFree(model.mesh,model.line.points,model.index);
                 }else{
                     changeSceneInLock(model.mesh);
-                    model.index=Objects.moveInLock(model.mesh,model.line.points,model.index);
+                    Objects.moveInLock(model.mesh,model.line.points,model.index)
+                    // model.index=Objects.moveInLock(model.mesh,model.line.points,model.index);
                 }
+                //更新火焰位置
+                Objects.moveInFree(model.fire,model.line.points,model.index);
+                //更新火焰粒子特效
+                model.fire.material.update(delta*2)
+                //播放控制
+                model.index=playControl(model.index,model.line.points);
+
                 Objects.rotate(model.mesh,0.1,0.1,0.1);
             }
         })
     }
 }
+function playControl(index,points){
+    if(guiParams.playState==='2'){
+        index=0;
+        guiParams.playState='0';
+    }else if(guiParams.playState==='0'){
+        index++;
+    }
 
+    if(index>=points.length-1){
+        index %=(points.length-1);
+    }
+
+    return index;
+}
 /**
  * 在锁定视角下切换场景
  */
@@ -95,7 +125,12 @@ function changeSceneInLock(model){
         three.camera.position.set(data['whole'][0].Map.x, data['whole'][0].Map.y,data['whole'][0].Map.z)
         three.scene=Map;
 
-        // initControls();
+        
+        three.controls.maxAzimuthAngle = 0.01;
+        three.controls.minAzimuthAngle = -0.01;
+        three.controls.maxPolarAngle = 2.983;
+        three.controls.minPolarAngle = 0.157;
+        three.controls.autoRotate = false;
     }
 }
 /**
@@ -176,28 +211,59 @@ async function createObject(scene){
         line.initOriginPoint(originPoint);
         line.generateLine();
 
-        //
+        //加载物体模型
         let obj=await models.loadObj(key+'.obj',key,{
             x:data[key][0][str].x,
             y:data[key][0][str].y,
             z:data[key][0][str].z
         })
 
+        //创建火焰
+        let fireMesh = createFire();
+        
+        //设置火焰初始位置
+        fireMesh.position.set(data[key][0][str].x,
+            data[key][0][str].y,
+            data[key][0][str].z)
+
         if(key === 'whole' && scene === Sphere){
             scene.add(obj);
             scene.add(line.line);
+        
+            scene.add(fireMesh);
         }else if(scene !==Sphere){
             scene.add(obj);
             scene.add(line.line);
+
+            scene.add(fireMesh);
         }
 
         model.mesh = obj;
         model.line = line;
+        model.fire=fireMesh;
 
         models.objects.push(model);
     }
-
+    
     return models;
+}
+
+/**
+ * 创建火焰
+ * @returns 
+ */
+function createFire(){
+
+    let fireRadius =1;
+    let fireHeight =10;
+    let particleCount =2000;
+    let geometry = new Geometry(fireRadius,fireHeight,particleCount);
+    let material = new Material({color:0xff2200});
+
+    material.setPerspective(three.camera.fov,window.innerHeight);
+    let fireMesh = new THREE.Points(geometry, material);
+
+    return fireMesh
 }
 
 /**
@@ -221,6 +287,9 @@ function guiSetting(){
         }
     });
     observeFolder.add(guiParams, "model", modelNames).name("控制对象");
+    observeFolder.add(guiParams, "start").name("开始")
+    observeFolder.add(guiParams, "stop").name("暂停")
+    observeFolder.add(guiParams, "reset").name("重播")
 
     const rotateFolder = three.gui.addFolder("旋转控制");
     rotateFolder.add(guiParams, "sceneRotate",).name("地球自转").onChange(function (value) {
@@ -232,6 +301,8 @@ function guiSetting(){
         three.controls.autoRotateSpeed = guiParams.sceneRotateSpeed;
     }).step(0.05);
 }
+
+
 
 /**
  * 初始化首界面的control控制参数
