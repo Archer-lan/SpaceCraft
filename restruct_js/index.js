@@ -2,8 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GUI } from "three/addons/libs/dat.gui.module.js";
 
-import { Geometry } from './js/fire/geometry.js';
-import { Material } from './js/fire/material.js';
 import { clock, guiParams, modelNames, models, three, transform } from './js/global.js';
 import { Map, Sphere } from './js/loadScene.js';
 import Obj from './js/objControl/object.js';
@@ -56,24 +54,27 @@ function render(){
  */
 function renderControl(){
     // let str = three.scene===Map?"Map":"Sphere";
+    let delta = clock.getDelta();
     if(three.scene===Map){
         models.Map.objects.forEach((model)=>{
             if(guiParams.mode==='0'){
                 changeSceneInFree();
-                Objects.moveInFree(model.mesh,model.line.points,model.index);
+
+                Objects.moveInFree(model.mesh,model.line.curve,model.index)
             }else{
                 if(model.mesh.name===guiParams.model){
-                    Objects.moveInLock(model.mesh,model.line.points,model.index);
+                    Objects.moveInLock(model.mesh,model.line.curve,model.index)
                 }else{
-                    Objects.moveInFree(model.mesh,model.line.points,model.index);
+                    Objects.moveInFree(model.mesh,model.line.curve,model.index)
                 } 
             }
+            // console.log(model.mesh.name,model.index)
             //更新火焰位置
-            altFireDir(model.fire,model)
+            Objects.fireMove(model.fire,model.line.curve,model.index)
  
 
             //播放控制
-            model.index=playControl(model.index,model.line.points);
+            model.index=playControl(delta,model.index);
 
             Objects.rotate(model.mesh,0.1,0.1,0.1);
         })
@@ -83,18 +84,20 @@ function renderControl(){
             if(model.mesh.name==='whole'){
                 if(guiParams.mode==='0'){
                     changeSceneInFree();
-                    Objects.moveInFree(model.mesh,model.line.points,model.index)
+ 
+                    Objects.moveInFree(model.mesh,model.line.curve,model.index)
                 }else{
                     changeSceneInLock(model.mesh);
-                    Objects.moveInLock(model.mesh,model.line.points,model.index)
+
+                    Objects.moveInLock(model.mesh,model.line.curve,model.index)
                 }
-                altFireDir(model.fire,model)
+                Objects.fireMove(model.fire,model.line.curve,model.index)
 
 
                 //播放控制
-                model.index=playControl(model.index,model.line.points);
+                model.index=playControl(delta,model.index);
 
-                // Objects.rotate(model.mesh,0.1,0.1,0.1);
+                Objects.rotate(model.mesh,0.1,0.1,0.1);
             }
         })
     }
@@ -106,18 +109,17 @@ function renderControl(){
  * @param {*} points 坠落路径点集
  * @returns 
  */
-function playControl(index,points){
+function playControl(delta,index){
+    // console.log(delta);
     if(guiParams.playState==='2'){
         index=0;
         guiParams.playState='0';
     }else if(guiParams.playState==='0'){
-        index++;
+        index +=delta*guiParams.playSpeed;
     }
 
-    if(index>=points.length-1){
-        index %=(points.length-1);
-    }
-
+    index = index%1; 
+    
     return index;
 }
 
@@ -218,14 +220,14 @@ async function createObject(scene){
         line.generateLine();
 
         //加载物体模型
-        let obj=await models.loadObj(key+'.obj',key,{
+        let obj=await Objects.loadObj(key+'.obj',key,{
             x:data[key][0][str].x,
             y:data[key][0][str].y,
             z:data[key][0][str].z
         })
 
         //创建火焰
-        let fireMesh = createFire();
+        let fireMesh = Objects.createFire();
         
         //设置火焰初始位置
         fireMesh.position.set(data[key][0][str].x,
@@ -254,52 +256,6 @@ async function createObject(scene){
     return models;
 }
 
-/**
- * 创建火焰
- * @returns 
- */
-function createFire(){
-
-    let fireRadius =1;
-    let fireHeight =10;
-    let particleCount =2000;
-    let geometry = new Geometry(fireRadius,fireHeight,particleCount);
-    let material = new Material({color:0xff2200});
-
-    material.setPerspective(three.camera.fov,window.innerHeight);
-    let fireMesh = new THREE.Points(geometry, material);
-
-    return fireMesh
-}
-
-function altFireDir(fire,model){
-    let delta=clock.getDelta();
-    // let t =0;
-    // t+= delta*0.1;
-    // t=t%1;
-    // let position = model.line.curve.getPoint(t);
-    // let position = model.line.points[model.index];
-    let percent = model.index/5000;
-    let position = model.line.curve.getPoint(percent);
-    fire.position.copy(position);
-
-    let tangent = model.line.curve.getTangent(percent).normalize();
-
-    let up=new THREE.Vector3(0, -1, 0);;
-    
-    // 用来调整火焰朝向的轴
-    let axis = new THREE.Vector3().crossVectors(up, tangent).normalize();
-    
-    // 根据轴和角度计算四元数
-    let radians = Math.acos(up.dot(tangent));
-    let quaternion = new THREE.Quaternion().setFromAxisAngle(axis, radians);
-    
-    // 应用四元数到火焰的旋转
-    fire.quaternion.copy(quaternion);
-    
-    fire.material.update(delta * 2);
-}
-
 
 /**
  * 设置gui界面参数
@@ -322,6 +278,7 @@ function guiSetting(){
         }
     });
     observeFolder.add(guiParams, "model", modelNames).name("控制对象");
+    observeFolder.add(guiParams, "playSpeed",0.01,0.1,0.01).name("播放速度")
     observeFolder.add(guiParams, "start").name("开始")
     observeFolder.add(guiParams, "stop").name("暂停")
     observeFolder.add(guiParams, "reset").name("重播")

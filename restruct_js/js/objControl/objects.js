@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import tools from '../../utils/tools.js';
+import { Geometry } from '../fire/geometry.js';
+import { Material } from '../fire/material.js';
 import { guiParams, three } from '../global.js';
 
 /**
@@ -18,7 +20,7 @@ export default class Objects{
      * @param {*} scale 模型缩放大小
      * @returns 
      */
-    async loadObj(fileName,modelName,position,sca){
+    static async loadObj(fileName,modelName,position,sca){
         const OBJloader = new OBJLoader().setPath("model/craft/");
         let scale = sca || {x:0.6,y:0.6,z:0.6};
         //加载模型
@@ -47,21 +49,22 @@ export default class Objects{
     /**
      * 移动物体在锁定视角的情况下
      * @param {*} model 模型对象
-     * @param {*} points 点数据
+     * @param {*} curve 曲线对象
      * @param {*} index 移动位置
      */
-    static moveInLock(model,points,index){
+    static moveInLock(model,curve,index){
+        let position=curve.getPoint(index);
         if(index===0){
-            three.camera.position.set(points[index].x,points[index].y,points[index].z);
-            three.controls.target.set(points[index].x,points[index].y,points[index].z);
+            three.camera.position.set(position.x,position.y,position.z);
+            three.controls.target.set(position.x,position.y,position.z);
         }
         if(guiParams.playState!=='1'){
-            model.position.set(points[index].x,points[index].y,points[index].z);
-            three.controls.target.set(points[index].x,points[index].y,points[index].z);
+            model.position.set(position.x,position.y,position.z);
+            three.controls.target.set(position.x,position.y,position.z);
 
-            let x = three.controls.object.position.clone().sub(model.position).x+points[index+1].x 
-            let y = three.controls.object.position.clone().sub(model.position).y+points[index+1].y
-            let z = three.controls.object.position.clone().sub(model.position).z+points[index+1].z
+            let x = three.controls.object.position.clone().sub(model.position).x+position.x 
+            let y = three.controls.object.position.clone().sub(model.position).y+position.y
+            let z = three.controls.object.position.clone().sub(model.position).z+position.z
         
             three.camera.position.set(x,y,z);
         }
@@ -70,17 +73,13 @@ export default class Objects{
     /**
      * 移动物体在自由视角的情况下
      * @param {*} model 模型对象
-     * @param {*} points 点数据
+     * @param {*} curve 曲线对象
      * @param {*} index 移动位置
      * @returns 
      */
-    static moveInFree(model,points,index){
-        // if(index>=points.length){
-        //     index %=(points.length);
-        // }
-        model.position.set(points[index].x,points[index].y,points[index].z);
-        // index++;
-        // return index;
+    static moveInFree(model,curve,index){
+        let position=curve.getPoint(index);
+        model.position.set(position.x,position.y,position.z)
     }
 
     /**
@@ -99,5 +98,50 @@ export default class Objects{
 
         let RollRad = rollAngle * Math.PI / 180
         model.rotateX(RollRad)
+    }
+
+    /**
+     * 创建火焰
+     * @returns 
+     */
+    static createFire(){
+
+        let fireRadius =1;
+        let fireHeight =15;
+        let particleCount =5000;
+        let geometry = new Geometry(fireRadius,fireHeight,particleCount);
+        let material = new Material({color:0xff2200});
+
+        material.setPerspective(three.camera.fov,window.innerHeight);
+        let fireMesh = new THREE.Points(geometry, material);
+
+        return fireMesh
+    }
+
+    /**
+     * 修正火焰的尾部朝向
+     * @param {*} fire 火焰对象
+     * @param {*} curve 曲线对象
+     * @param {*} index 移动位置标记
+     */
+    static fireMove(fire,curve,index){
+        let position = curve.getPoint(index);
+        fire.position.copy(position);
+
+        let tangent = curve.getTangent(index).normalize();
+
+        let up=new THREE.Vector3(0, -1, 0);;
+        
+        // 用来调整火焰朝向的轴
+        let axis = new THREE.Vector3().crossVectors(up, tangent).normalize();
+        
+        // 根据轴和角度计算四元数
+        let radians = Math.acos(up.dot(tangent));
+        let quaternion = new THREE.Quaternion().setFromAxisAngle(axis, radians);
+        
+        // 应用四元数到火焰的旋转
+        fire.quaternion.copy(quaternion);
+        
+        fire.material.update(index);
     }
 }
