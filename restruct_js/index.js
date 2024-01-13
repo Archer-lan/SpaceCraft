@@ -56,7 +56,6 @@ function render(){
  */
 function renderControl(){
     // let str = three.scene===Map?"Map":"Sphere";
-    let delta = clock.getDelta();
     if(three.scene===Map){
         models.Map.objects.forEach((model)=>{
             if(guiParams.mode==='0'){
@@ -70,8 +69,9 @@ function renderControl(){
                 } 
             }
             //更新火焰位置
-            Objects.moveInFree(model.fire,model.line.points,model.index);
-            model.fire.material.update(delta*2)
+            altFireDir(model.fire,model)
+ 
+
             //播放控制
             model.index=playControl(model.index,model.line.points);
 
@@ -84,24 +84,28 @@ function renderControl(){
                 if(guiParams.mode==='0'){
                     changeSceneInFree();
                     Objects.moveInFree(model.mesh,model.line.points,model.index)
-                    // model.index=Objects.moveInFree(model.mesh,model.line.points,model.index);
                 }else{
                     changeSceneInLock(model.mesh);
                     Objects.moveInLock(model.mesh,model.line.points,model.index)
-                    // model.index=Objects.moveInLock(model.mesh,model.line.points,model.index);
                 }
-                //更新火焰位置
-                Objects.moveInFree(model.fire,model.line.points,model.index);
-                //更新火焰粒子特效
-                model.fire.material.update(delta*2)
+                altFireDir(model.fire,model)
+
+
                 //播放控制
                 model.index=playControl(model.index,model.line.points);
 
-                Objects.rotate(model.mesh,0.1,0.1,0.1);
+                // Objects.rotate(model.mesh,0.1,0.1,0.1);
             }
         })
     }
 }
+
+/**
+ * 播放控制模块 
+ * @param {*} index 当前移动方向
+ * @param {*} points 坠落路径点集
+ * @returns 
+ */
 function playControl(index,points){
     if(guiParams.playState==='2'){
         index=0;
@@ -116,6 +120,7 @@ function playControl(index,points){
 
     return index;
 }
+
 /**
  * 在锁定视角下切换场景
  */
@@ -133,6 +138,7 @@ function changeSceneInLock(model){
         three.controls.autoRotate = false;
     }
 }
+
 /**
  * 在自由视角下切换场景
  */
@@ -266,6 +272,35 @@ function createFire(){
     return fireMesh
 }
 
+function altFireDir(fire,model){
+    let delta=clock.getDelta();
+    // let t =0;
+    // t+= delta*0.1;
+    // t=t%1;
+    // let position = model.line.curve.getPoint(t);
+    // let position = model.line.points[model.index];
+    let percent = model.index/5000;
+    let position = model.line.curve.getPoint(percent);
+    fire.position.copy(position);
+
+    let tangent = model.line.curve.getTangent(percent).normalize();
+
+    let up=new THREE.Vector3(0, -1, 0);;
+    
+    // 用来调整火焰朝向的轴
+    let axis = new THREE.Vector3().crossVectors(up, tangent).normalize();
+    
+    // 根据轴和角度计算四元数
+    let radians = Math.acos(up.dot(tangent));
+    let quaternion = new THREE.Quaternion().setFromAxisAngle(axis, radians);
+    
+    // 应用四元数到火焰的旋转
+    fire.quaternion.copy(quaternion);
+    
+    fire.material.update(delta * 2);
+}
+
+
 /**
  * 设置gui界面参数
  */
@@ -302,8 +337,6 @@ function guiSetting(){
     }).step(0.05);
 }
 
-
-
 /**
  * 初始化首界面的control控制参数
  */
@@ -326,7 +359,6 @@ function initControls(){
         three.controls.update();
     }
 }
-
 
 /**
  * 初始化three场景参数

@@ -6,6 +6,7 @@ export default class Line{
         this.initPoint=[];
         this.points = [];
         this.line=null;
+        this.curve=null;
     }
 
     /**
@@ -40,5 +41,6 @@ export default class Line{
         )
         this.points=points;
         this.line=line;
+        this.curve = curve;
     }
 }

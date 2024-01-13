@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import tools from '../../utils/tools.js';
-import { three } from '../global.js';
+import { guiParams, three } from '../global.js';
 
 /**
  * 物体类控制所有物体
@@ -55,20 +55,16 @@ export default class Objects{
             three.camera.position.set(points[index].x,points[index].y,points[index].z);
             three.controls.target.set(points[index].x,points[index].y,points[index].z);
         }
-        // if(index>=points.length){
-        //     index %=(points.length);
-        // }
-        model.position.set(points[index].x,points[index].y,points[index].z);
-        three.controls.target.set(points[index].x,points[index].y,points[index].z);
+        if(guiParams.playState!=='1'){
+            model.position.set(points[index].x,points[index].y,points[index].z);
+            three.controls.target.set(points[index].x,points[index].y,points[index].z);
 
-        let x = three.controls.object.position.clone().sub(model.position).x+points[index+1].x 
-        let y = three.controls.object.position.clone().sub(model.position).y+points[index+1].y
-        let z = three.controls.object.position.clone().sub(model.position).z+points[index+1].z
-    
-        three.camera.position.set(x,y,z);
+            let x = three.controls.object.position.clone().sub(model.position).x+points[index+1].x 
+            let y = three.controls.object.position.clone().sub(model.position).y+points[index+1].y
+            let z = three.controls.object.position.clone().sub(model.position).z+points[index+1].z
         
-        // index++;
-        // return index;
+            three.camera.position.set(x,y,z);
+        }
     }
 
     /**
