@@ -35,7 +35,7 @@ export default class Line{
     generateRotation(number,color){
         // console.log(this.initRotation)
         let rotation = [...this.initRotation]
-        let offsets = [{x:0,y:0,z:0}]
+        // let offsets = [{x:0,y:0,z:0}]
         for(let i=0;i<rotation.length-1;i++){
             if(rotation[i].x>rotation[i+1].x){
                 rotation[i+1].x +=6.283
