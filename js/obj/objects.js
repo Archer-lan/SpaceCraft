@@ -107,14 +107,22 @@ export default class Objects{
      * @param {*} yawAngle 偏航角，绕y
      * @param {*} rollAngle 滚转角，绕x
      */
-    static rotate(model,pitchAngle=0.3,yawAngle=0.3,rollAngle=0.3){
-        let PitchRad = pitchAngle * Math.PI / 180
+    static rotate(model,rotate1,index,number){
+        let rotation=rotate1.getPointAt(index);
+        index+=1/number*guiParams.playSpeed;
+        if(index>=1){
+            index=0;
+        }
+        let nextRotation=rotate1.getPointAt(index);
+
+
+        let PitchRad = (nextRotation.z-rotation.z) * Math.PI / 180
         model.rotateZ(PitchRad)
 
-        let YawRad = yawAngle * Math.PI / 180
+        let YawRad = (nextRotation.y-rotation.y) * Math.PI / 180
         model.rotateY(YawRad)
 
-        let RollRad = rollAngle * Math.PI / 180
+        let RollRad = (nextRotation.x-rotation.x) * Math.PI / 180
         model.rotateX(RollRad)
     }
 

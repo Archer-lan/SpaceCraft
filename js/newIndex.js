@@ -12,13 +12,15 @@ init();
 
 async function init(){
     //初始化数据
-    modelNames.push(...Object.keys(data));
+    modelNames.push(Object.keys(data)[0]);
     guiParams.model=modelNames[0];
     data = transformData(data);
+    console.log(data)
+
     //初始化three场景参数
     initScene({
         x: data[guiParams.model][0].position.x,
-        y: data[guiParams.model][0].position.y+100,
+        y: data[guiParams.model][0].position.y,
         z: data[guiParams.model][0].position.z + 5
     });
 
@@ -54,15 +56,12 @@ function render(){
  */
 
 function renderControl(){
-    //模型可见切换标记
     let changeFlag=false;
-    models.Sphere.objects.forEach((model,index)=>{
-        //仅移动可见模型
+    models.Sphere.objects.forEach((model)=>{
         if(model.mesh.visible===true){
-            //在自由视角下移动
             if(guiParams.mode==='0'){
+                // console.log(model.index)
                 Objects.moveInFree(model.mesh,model.line.curve,model.index);
-            //在锁定视角下移动
             }else{
                 if(model.mesh.name===guiParams.model){
                     Objects.moveInLock(model.mesh,model.line.curve,model.index,model.line.number);
@@ -71,42 +70,43 @@ function renderControl(){
                 }
             }
             Objects.fireMove(model.fire,model.line.curve,model.index);
+            // console.log(model)
+            Objects.rotate(model.mesh,model.line.rotateObj, model.index,model.line.number);
 
-            Objects.rotate(model.mesh,0.1,0.1,0.1);
-
-            //重播时处理
             if(guiParams.playState==='2'){
                 model.index=0;
-                if(index==models.Sphere.objects.length-1){
-                    guiParams.playState='0';
-                }
-            //正常播放时处理
+                guiParams.playState='0';
             }else if(guiParams.playState==='0'){
                 model.index+=1/model.line.number*guiParams.playSpeed;
             }
-
-            //在超过边界时，处理值，锁定视角下切换追踪模型。
+            
             if(model.index>=1) {
                 changeFlag=true;
-                model.index=0;
-                if(guiParams.model===modelNames[0]){
-                    guiParams.model=modelNames[1];
-                }
-                if(index===models.Sphere.objects.length-1&&guiParams.model!==modelNames[0]){
-                    guiParams.model=modelNames[0];
-                }
             }
-        }    
+            if(model.index>=1){
+                model.index=0;
+            }
+        }
     })
-    
-    //重置一次模型是否可见，确保所有模型都重置
+
+    if(changeFlag){
+        modelNames.splice(0,modelNames.length);
+    }
     models.Sphere.objects.forEach((model)=>{
         if(changeFlag){
             model.mesh.visible=!model.mesh.visible;
             model.fire.visible=!model.fire.visible;
+
+            if(model.mesh.visible){
+                modelNames.push(model.mesh.name);
+            }
+            
         }
     })
-
+    if(changeFlag){
+        three.gui.updateDisplay();
+        console.log(modelNames);
+    }
 }
 
 
@@ -149,7 +149,7 @@ function guiSetting(){
         "自由视角": 0
     }).name("观看模式").onChange(function (value) {
         if (value === "1") {
-            three.controls.maxDistance = 500;
+            three.controls.maxDistance = 30;
             three.controls.minDistance = 5;
         } else {
             three.controls.maxDistance = 500;
@@ -190,10 +190,21 @@ async function createObject(scene,data){
         data[key].map((d)=>{
             originPoint.push(d['position']);
         })
+
+        //旋转值
+        let originRotate = []
+        data[key].map((d)=>{
+            originRotate.push(d['rotate'])
+        })
         //初始化原始点数据
         line.initOriginPoint(originPoint);
         //生成对应线
         line.generateLine();
+
+        //初始化旋转值数据
+        line.initOriginRotation(originRotate)
+        line.generateRotation()
+       
 
         //加载模型
         let obj = await Objects.loadObj(key+'.obj',key,
