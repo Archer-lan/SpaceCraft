@@ -15,6 +15,7 @@ async function init(){
     modelNames.push(Object.keys(data)[0]);
     guiParams.model=modelNames[0];
     data = transformData(data);
+    console.log(data)
 
     //初始化three场景参数
     initScene({
@@ -28,7 +29,7 @@ async function init(){
 
     //创建模型
     models.Sphere=await createObject(Sphere,data);
-    console.log(models);
+    // console.log(models);
 
     //将Sphere置为场景
     three.scene = Sphere;
@@ -59,6 +60,7 @@ function renderControl(){
     models.Sphere.objects.forEach((model)=>{
         if(model.mesh.visible===true){
             if(guiParams.mode==='0'){
+                // console.log(model.index)
                 Objects.moveInFree(model.mesh,model.line.curve,model.index);
             }else{
                 if(model.mesh.name===guiParams.model){
@@ -68,8 +70,8 @@ function renderControl(){
                 }
             }
             Objects.fireMove(model.fire,model.line.curve,model.index);
-
-            Objects.rotate(model.mesh,0.1,0.1,0.1);
+            // console.log(model)
+            Objects.rotate(model.mesh,model.line.rotateObj, model.index,model.line.number);
 
             if(guiParams.playState==='2'){
                 model.index=0;
@@ -188,10 +190,21 @@ async function createObject(scene,data){
         data[key].map((d)=>{
             originPoint.push(d['position']);
         })
+
+        //旋转值
+        let originRotate = []
+        data[key].map((d)=>{
+            originRotate.push(d['rotate'])
+        })
         //初始化原始点数据
         line.initOriginPoint(originPoint);
         //生成对应线
         line.generateLine();
+
+        //初始化旋转值数据
+        line.initOriginRotation(originRotate)
+        line.generateRotation()
+       
 
         //加载模型
         let obj = await Objects.loadObj(key+'.obj',key,

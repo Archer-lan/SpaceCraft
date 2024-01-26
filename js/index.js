@@ -15,11 +15,10 @@ async function init(){
     modelNames.push(...Object.keys(data));
     guiParams.model=modelNames[0];
     data = transformData(data);
-
     //初始化three场景参数
     initScene({
         x: data[guiParams.model][0].position.x,
-        y: data[guiParams.model][0].position.y,
+        y: data[guiParams.model][0].position.y+100,
         z: data[guiParams.model][0].position.z + 5
     });
 
@@ -28,7 +27,7 @@ async function init(){
 
     //创建模型
     models.Sphere=await createObject(Sphere,data);
-    console.log(models);
+    // console.log(models);
 
     //将Sphere置为场景
     three.scene = Sphere;
