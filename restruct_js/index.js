@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GUI } from "three/addons/libs/dat.gui.module.js";
 
-import { clock, guiParams, modelNames, models, three, transform } from './js/global.js';
+import { guiParams, modelNames, models, three, transform } from './js/global.js';
 import { Map, Sphere } from './js/loadScene.js';
 import Obj from './js/objControl/object.js';
 import Objects from './js/objControl/objects.js';
@@ -53,8 +53,7 @@ function render(){
  * 循环渲染控制，模型运动与旋转控制，场景切换控制
  */
 function renderControl(){
-    // let str = three.scene===Map?"Map":"Sphere";
-    let delta = clock.getDelta();
+    // let delta = clock.getDelta();
     if(three.scene===Map){
         models.Map.objects.forEach((model)=>{
             if(guiParams.mode==='0'){
@@ -63,18 +62,17 @@ function renderControl(){
                 Objects.moveInFree(model.mesh,model.line.curve,model.index)
             }else{
                 if(model.mesh.name===guiParams.model){
-                    Objects.moveInLock(model.mesh,model.line.curve,model.index)
+                    Objects.moveInLock(model.mesh,model.line.curve,model.index,model.line.number)
                 }else{
                     Objects.moveInFree(model.mesh,model.line.curve,model.index)
                 } 
             }
-            // console.log(model.mesh.name,model.index)
             //更新火焰位置
             Objects.fireMove(model.fire,model.line.curve,model.index)
  
 
             //播放控制
-            model.index=playControl(delta,model.index);
+            model.index=playControl(model.line.number,model.index);
 
             Objects.rotate(model.mesh,0.1,0.1,0.1);
         })
@@ -89,13 +87,13 @@ function renderControl(){
                 }else{
                     changeSceneInLock(model.mesh);
 
-                    Objects.moveInLock(model.mesh,model.line.curve,model.index)
+                    Objects.moveInLock(model.mesh,model.line.curve,model.index,model.line.number)
                 }
                 Objects.fireMove(model.fire,model.line.curve,model.index)
 
 
                 //播放控制
-                model.index=playControl(delta,model.index);
+                model.index=playControl(model.line.number,model.index);
 
                 Objects.rotate(model.mesh,0.1,0.1,0.1);
             }
@@ -109,15 +107,14 @@ function renderControl(){
  * @param {*} points 坠落路径点集
  * @returns 
  */
-function playControl(delta,index){
-    // console.log(delta);
+function playControl(number,index){
     if(guiParams.playState==='2'){
         index=0;
         guiParams.playState='0';
     }else if(guiParams.playState==='0'){
-        index +=delta*guiParams.playSpeed;
+        index+=1/number*guiParams.playSpeed;
     }
-
+    
     index = index%1; 
     
     return index;
@@ -278,7 +275,7 @@ function guiSetting(){
         }
     });
     observeFolder.add(guiParams, "model", modelNames).name("控制对象");
-    observeFolder.add(guiParams, "playSpeed",0.01,0.1,0.01).name("播放速度")
+    observeFolder.add(guiParams, "playSpeed",1,10,1).name("播放速度")
     observeFolder.add(guiParams, "start").name("开始")
     observeFolder.add(guiParams, "stop").name("暂停")
     observeFolder.add(guiParams, "reset").name("重播")

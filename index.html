@@ -31,33 +31,33 @@
         let height2=7771000
         let height3=7771000
         let data=Mock.mock({
-            'whole|5':[{
+            'whole|3':[{
                 'latitude|3-53.33-51':3,
                 'longitude|73-135.05-33':73,
                 'height|1':function(){
-                    height = Math.max(6371000,height-Mock.Random.integer(500000,1500000));
+                    height = Math.max(7771000,height-Mock.Random.integer(800000,1500000));
                     return height;
                 },
                 'xRotate|0-6.28318':0.2,
                 'yRotate|0-6.28318':0.2,
                 'zRotate|0-6.28318':0.2,
             }],
-            'solarpanel|5':[{
+            'solarpanel|2':[{
                 'latitude|3-53.33-51':3,
                 'longitude|73-135.05-33':73,
                 'height|1':function(){
-                    height2 = Math.max(6371000,height2-Mock.Random.integer(100000,700000));
+                    height2 = Math.max(6371000,height2-Mock.Random.integer(700000,1000000));
                     return height2;
                 },
                 'xRotate|0-6.28318':0.2,
                 'yRotate|0-6.28318':0.2,
                 'zRotate|0-6.28318':0.2,
             }],
-            'cabin|5':[{
+            'cabin|2':[{
                 'latitude|3-53.33-51':3,
                 'longitude|73-135.05-33':73,
                 'height|1':function(){
-                    height3 = Math.max(6371000,height3-Mock.Random.integer(100000,700000));
+                    height3 = Math.max(6371000,height3-Mock.Random.integer(700000,1000000));
                     return height3;
                 },
                 'xRotate|0-6.28318':0.2,
@@ -67,7 +67,7 @@
         })
         // console.log(data);
     </script>
-    <!-- <script type="module" src="./js/index.js"></script> -->
-    <script type="module" src="./restruct_js/index.js"></script>
+    <script type="module" src="./js/index.js"></script>
+    <!-- <script type="module" src="./restruct_js/index.js"></script> -->
 </body>
 </html>

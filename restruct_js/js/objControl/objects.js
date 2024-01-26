@@ -52,20 +52,26 @@ export default class Objects{
      * @param {*} curve 曲线对象
      * @param {*} index 移动位置
      */
-    static moveInLock(model,curve,index){
-        let position=curve.getPoint(index);
+    static moveInLock(model,curve,index,number){
+        let position=curve.getPointAt(index);
+        index+=1/number*guiParams.playSpeed;
+        index=index%1;
+        let nextPosition = curve.getPointAt(index);
         if(index===0){
-            three.camera.position.set(position.x,position.y,position.z);
-            three.controls.target.set(position.x,position.y,position.z);
+            three.camera.position.copy(position);
+            three.controls.target.copy(position);
         }
         if(guiParams.playState!=='1'){
-            model.position.set(position.x,position.y,position.z);
-            three.controls.target.set(position.x,position.y,position.z);
+            model.position.copy(position);
+            
+            three.controls.target.copy(position);
+            
 
-            let x = three.controls.object.position.clone().sub(model.position).x+position.x 
-            let y = three.controls.object.position.clone().sub(model.position).y+position.y
-            let z = three.controls.object.position.clone().sub(model.position).z+position.z
+            let x = three.controls.object.position.clone().sub(model.position).x+nextPosition.x 
+            let y = three.controls.object.position.clone().sub(model.position).y+nextPosition.y
+            let z = three.controls.object.position.clone().sub(model.position).z+nextPosition.z
         
+            // three.camera.position.copy(position);
             three.camera.position.set(x,y,z);
         }
     }
@@ -78,8 +84,8 @@ export default class Objects{
      * @returns 
      */
     static moveInFree(model,curve,index){
-        let position=curve.getPoint(index);
-        model.position.set(position.x,position.y,position.z)
+        let position=curve.getPointAt(index);
+        model.position.copy(position)
     }
 
     /**
@@ -125,7 +131,7 @@ export default class Objects{
      * @param {*} index 移动位置标记
      */
     static fireMove(fire,curve,index){
-        let position = curve.getPoint(index);
+        let position = curve.getPointAt(index);
         fire.position.copy(position);
 
         let tangent = curve.getTangent(index).normalize();

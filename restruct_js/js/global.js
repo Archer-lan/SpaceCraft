@@ -27,7 +27,7 @@ const clock = new THREE.Clock();
 const guiParams = {
     mode: "0",//调整观看模式，当mode为0时是自由视角，mode为1是视角锁定为航天器
     playState:'0',//动画播放状态
-    playSpeed:0.01,//播放速度
+    playSpeed:1,//播放速度
     start:function(){
         this.playState='0'//开始播放
     },
