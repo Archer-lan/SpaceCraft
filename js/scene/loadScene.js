@@ -24,6 +24,19 @@ function loadSphere(){
         model.rotation.z=Math.PI;//旋转地球模型，使得模型能够满足经纬度坐标轴
         model.rotation.x=Math.PI;
         model.rotation.y=Math.PI/10;
+
+        model.traverse((child) => {
+            if (child.isMesh) {
+                // 检查材质是否有 emissiveMap
+                if (child.material.emissiveMap) {
+                    // 移除 emissive 纹理
+                    child.material.emissiveMap = null;
+                    child.material.emissive.setHex(0x000000);
+                    child.material.needsUpdate = true; // 更新材质以使更改生效
+                }
+            }
+        });
+
         Sphere.add(model);
     })
 }

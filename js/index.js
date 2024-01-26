@@ -55,11 +55,15 @@ function render(){
  */
 
 function renderControl(){
+    //模型可见切换标记
     let changeFlag=false;
     models.Sphere.objects.forEach((model,index)=>{
+        //仅移动可见模型
         if(model.mesh.visible===true){
+            //在自由视角下移动
             if(guiParams.mode==='0'){
                 Objects.moveInFree(model.mesh,model.line.curve,model.index);
+            //在锁定视角下移动
             }else{
                 if(model.mesh.name===guiParams.model){
                     Objects.moveInLock(model.mesh,model.line.curve,model.index,model.line.number);
@@ -71,15 +75,18 @@ function renderControl(){
 
             Objects.rotate(model.mesh,0.1,0.1,0.1);
 
+            //重播时处理
             if(guiParams.playState==='2'){
                 model.index=0;
                 if(index==models.Sphere.objects.length-1){
                     guiParams.playState='0';
                 }
+            //正常播放时处理
             }else if(guiParams.playState==='0'){
                 model.index+=1/model.line.number*guiParams.playSpeed;
             }
 
+            //在超过边界时，处理值，锁定视角下切换追踪模型。
             if(model.index>=1) {
                 changeFlag=true;
                 model.index=0;
@@ -93,6 +100,7 @@ function renderControl(){
         }    
     })
     
+    //重置一次模型是否可见，确保所有模型都重置
     models.Sphere.objects.forEach((model)=>{
         if(changeFlag){
             model.mesh.visible=!model.mesh.visible;
