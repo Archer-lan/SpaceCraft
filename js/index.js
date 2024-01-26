@@ -72,7 +72,7 @@ function renderControl(){
             }
             Objects.fireMove(model.fire,model.line.curve,model.index);
 
-            Objects.rotate(model.mesh,0.1,0.1,0.1);
+            Objects.rotate(model.mesh,model.line.rotateObj, model.index,model.line.number);
 
             //重播时处理
             if(guiParams.playState==='2'){
@@ -194,6 +194,15 @@ async function createObject(scene,data){
         line.initOriginPoint(originPoint);
         //生成对应线
         line.generateLine();
+
+        //旋转值
+        let originRotate = []
+        data[key].map((d)=>{
+            originRotate.push(d['rotate'])
+        })
+        //初始化旋转值数据
+        line.initOriginRotation(originRotate)
+        line.generateRotation()
 
         //加载模型
         let obj = await Objects.loadObj(key+'.obj',key,

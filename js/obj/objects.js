@@ -115,7 +115,7 @@ export default class Objects{
         }
         let nextRotation=rotate1.getPointAt(index);
 
-
+        console.log(nextRotation.z-rotation.z);
         let PitchRad = (nextRotation.z-rotation.z) * Math.PI / 180
         model.rotateZ(PitchRad)
 
