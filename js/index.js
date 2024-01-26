@@ -53,9 +53,10 @@ function render(){
 /**
  * 循环渲染控制，模型运动与旋转控制
  */
-let flag=false;
+
 function renderControl(){
-    models.Sphere.objects.forEach((model)=>{
+    let changeFlag=false;
+    models.Sphere.objects.forEach((model,index)=>{
         if(model.mesh.visible===true){
             if(guiParams.mode==='0'){
                 Objects.moveInFree(model.mesh,model.line.curve,model.index);
@@ -70,47 +71,38 @@ function renderControl(){
 
             Objects.rotate(model.mesh,0.1,0.1,0.1);
 
-            //播放控制
-            model.index=playControl(model.line.number,model.index);
-        }
+            if(guiParams.playState==='2'){
+                model.index=0;
+                if(index==models.Sphere.objects.length-1){
+                    guiParams.playState='0';
+                }
+            }else if(guiParams.playState==='0'){
+                model.index+=1/model.line.number*guiParams.playSpeed;
+            }
+
+            if(model.index>=1) {
+                changeFlag=true;
+                model.index=0;
+                if(guiParams.model===modelNames[0]){
+                    guiParams.model=modelNames[1];
+                }
+                if(index===models.Sphere.objects.length-1&&guiParams.model!==modelNames[0]){
+                    guiParams.model=modelNames[0];
+                }
+            }
+        }    
     })
+    
     models.Sphere.objects.forEach((model)=>{
-        if(flag){
+        if(changeFlag){
             model.mesh.visible=!model.mesh.visible;
             model.fire.visible=!model.fire.visible;
         }
     })
-    flag=false;
+
 }
 
-/**
- * 播放控制模块 
- * @param {*} index 当前移动方向
- * @param {*} points 坠落路径点集
- * @returns 
- */
-function playControl(number,index){
-    if(guiParams.playState==='2'){
-        index=0;
-        guiParams.playState='0';
-    }else if(guiParams.playState==='0'){
-        index+=1/number*guiParams.playSpeed;
-    }
-    
-    if(index>=1) {
-        flag=true;
-        if(guiParams.model===modelNames[0]){
-            guiParams.model=modelNames[1];
-        }else{
-            guiParams.model=modelNames[0];
-        }
-    }
-    if(index>=1){
-        index=0;
-    }
-    
-    return index;
-}
+
 
 /**
  * 初始化three场景参数
@@ -144,12 +136,13 @@ function initScene(position){
  */
 function guiSetting(){
     const observeFolder = three.gui.addFolder("观看控制");
+
     observeFolder.add(guiParams, "mode", {
         "锁定视角": 1,
         "自由视角": 0
     }).name("观看模式").onChange(function (value) {
         if (value === "1") {
-            three.controls.maxDistance = 30;
+            three.controls.maxDistance = 500;
             three.controls.minDistance = 5;
         } else {
             three.controls.maxDistance = 500;
@@ -159,7 +152,7 @@ function guiSetting(){
             three.controls.target.set(0, 0, 0);
         }
     });
-    observeFolder.add(guiParams, "model", modelNames).name("控制对象");
+    observeFolder.add(guiParams, "model", modelNames).name("控制对象")
     observeFolder.add(guiParams, "playSpeed",1,10,1).name("播放速度")
     observeFolder.add(guiParams, "start").name("开始")
     observeFolder.add(guiParams, "stop").name("暂停")
